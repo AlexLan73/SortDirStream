@@ -1,26 +1,22 @@
-import sys, os, glob
+import sys, os, glob, time
 import logging.config
-
 import threading
-import time
-
 from LogFile import *
 
-logger, path_file_logger, is_prog, path_dan  = {}, "", True, ""
+logger, path_file_logger, is_prog, path_dan = {}, "", True, ""
+
 
 # pyinstaller -F SortDirStream.py
 
 
 def direct(path_dir):
     global logger
-    if not (os.path.isdir(path_dir)):
+    if not(os.path.isdir(path_dir)):
         logger.info(" создает dir - {}".format(path_dir))
         os.mkdir(path_dir)
         if os.path.isdir(path_dir):
-            pass
             logger.info(" dir - {}   # создана".format(path_dir))
         else:
-            pass
             logger.warning(" dir - {}   # проблема создания ".format(path_dir))
 
 
@@ -34,7 +30,6 @@ def read_dir_files():
         return (_count, _f)
 
     is_prog = False
-    #    print(" --- start  -- ")
     _count_files = len(glob.glob(path_dan))
     _fils_dan = _test_log_file()
     _count_files = _fils_dan[0]
@@ -47,7 +42,7 @@ def read_dir_files():
 
             __i = _name_file_basa.rindex(".")
             _name_file0 = _name_file_basa[:__i]
-
+            # разбор названия
             p = ["", "", ""]
             __i = _name_file0.rindex("_")
             p[1] = _name_file0[__i + 1:]
@@ -68,7 +63,7 @@ def read_dir_files():
             if os.path.isfile(__path):
                 os.remove(__path)
             try:
-                with open(_file) as f:  # utf-8-sig   #utf-8  , encoding='utf-8-sig'
+                with open(_file) as f:
                     pass
                 os.rename(_file, __path)
 
@@ -81,12 +76,11 @@ def read_dir_files():
                 logger.warning(" - проблема с перемещением файл {}".format(__path))
 
             statinfo = os.stat(path_file_logger)
-            if statinfo.st_size >= 104857600:   # if statinfo.st_size >= 1024*10:
+            if statinfo.st_size >= 104857600:  # if statinfo.st_size >= 1024*10:
                 inicial_logging()
 
         _fils_dan = _test_log_file()
         _count_files = _fils_dan[0]
-    #    print("--- end  --  ")
     is_prog = True
 
 
@@ -94,7 +88,6 @@ def Start_module():
     global is_prog, logger
     if is_prog:
         is_prog = False
-
         x = threading.Thread(target=read_dir_files, daemon=True)
         x.start()
 
@@ -112,7 +105,7 @@ class MyThread(threading.Thread):
 
 def parse_input_arguments():
     global logger
-    name_file_run = __file__
+    name_file_run = __file__    # путь старта программы
     ls_arg = sys.argv
     k = 0
     for it in ls_arg:
@@ -138,7 +131,7 @@ def parse_input_arguments():
 def inicial_logging():
     global logger, path_file_logger
     _path_log = "C:\\CSM UniCAN2\\UNICAN CONVERTED FILES\\LOG"
-    if ~os.path.isdir(_path_log):
+    if not(os.path.isdir(_path_log)):
         os.mkdir(_path_log)
 
     dictLogConfig = logging_dict(_path_log)
@@ -167,4 +160,3 @@ if __name__ == "__main__":
     stopFlag.set()
 
     logger.info("END нормальное завершение программы")
-

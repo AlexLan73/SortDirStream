@@ -13,16 +13,62 @@ logger = {}
 # pyinstaller -F SortDirStream.py
 
 is_prog = True
+path_dan =""
+
+def direct(path_dir):
+    if not(os.path.isdir(path_dir)):
+        logger.info(" создает dir - {}".format(path_dir))
+        os.mkdir(path_dir)
+        if os.path.isdir(path_dir):
+            pass
+            logger.info(" dir - {}   # создана".format(path_dir))
+        else:
+            pass
+            logger.warning(" dir - {}   # проблема создания ".format(path_dir))
 
 
 def read_dir_files():
-    global is_prog
+    global is_prog, path_dan, logger
     is_prog = False
-    print(" --- start  -- ")
-    for i in range(15):
-        print(i, time.ctime())
-        time.sleep(0.1)
-    print("--- end  --  ")
+#    print(" --- start  -- ")
+    _count_files = len(glob.glob(path_dan))
+
+    while _count_files>0:
+         _files = glob.glob(path_dan)
+         for _file in _files:
+            _name_file_basa =os.path.basename(_file)
+            path_dir =os.path.dirname(_file)
+
+            __i  = _name_file_basa.rindex(".")
+            _name_file0 = _name_file_basa[:__i]
+
+            p=["","",""]
+            __i = _name_file0.rindex("_")
+            p[1] =  _name_file0[__i+1:]
+            _name_file1 = _name_file0[:__i-16]
+            __i = _name_file1.rindex("-")
+            p[2] = _name_file1 [__i+1:].split("_")[0]
+            p[0] = _name_file1[:__i]
+
+            direct(path_dir)
+            path_dir = path_dir + "\\" + p[0]
+            direct(path_dir)
+            path_dir = path_dir + "\\" + p[2]
+            direct(path_dir)
+            path_dir = path_dir + "\\" + p[1]
+            direct(path_dir)
+            __path = path_dir+"\\"+_name_file_basa
+            logger.info(" - перемещаем файл {}".format(__path))
+            if os.path.isfile(__path):
+                os.remove(__path)
+            os.rename(_file, __path)
+
+            if os.path.isfile(__path):
+                 logger.info(" -  файл {}  перемещен".format(__path))
+            else:
+                 logger.warning(" - проблема с перемещением файл {}".format(__path))
+         _count_files = len(glob.glob(path_dan))
+#    print("--- end  --  ")
     is_prog = True
 
 def Start_module():
@@ -39,7 +85,7 @@ class MyThread(threading.Thread):
         self.fun = fun
 
     def run(self):
-        while not self.stopped.wait(0.1):
+        while not self.stopped.wait(0.5):
             self.fun()
 
 def parse_input_arguments():
@@ -68,24 +114,25 @@ def parse_input_arguments():
 
 if __name__ == "__main__":
     print(" == START ==")
-    path ="E:\\1\\CSM UniCAN2\\UNICAN CONVERTED FILES"
+#    path_dan ="E:\\1\\CSM UniCAN2\\UNICAN CONVERTED FILES\\*.*"
+    _path_log = "C:\\CSM UniCAN2\\UNICAN CONVERTED FILES"
 
-    _path_log = "C:\\CSM UniCAN2\\UNICAN CONVERTED FILES\\"
     dictLogConfig = logging_dict(_path_log)
     logging.config.dictConfig(dictLogConfig)
     logger = logging.getLogger("exampleApp")
     logger.info("START")
 
     __path_start = parse_input_arguments()
+    path_dan = __path_start[1]+"\\*.*"
 
     stopFlag = threading.Event()
     thread = MyThread(stopFlag, Start_module)
 
     thread.start()
 
-    time.sleep(5)
+    while True:
+        time.sleep(60)
+
     stopFlag.set()
-    while not (is_prog):
-        print(is_prog, "-----  !!!!!!!!!!!! while ")
-        time.sleep(0.3)
-        pass
+
+    logger.info("END нормальное завершение программы")

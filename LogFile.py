@@ -1,6 +1,11 @@
 
 def logging_dict(path):
-    _name_log = path+"\\log_file.log"
+    import datetime
+    now = datetime.datetime.now()
+
+    _dt = now.strftime("%d-%m-%Y_%H-%M-%S")
+
+    _name_log = path+"\\log_"+_dt+".log"
     print("  Где лежит лог файл", _name_log)
 
     dictLogConfig = {

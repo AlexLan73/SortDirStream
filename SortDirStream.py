@@ -2,7 +2,6 @@ import sys, os, glob
 import logging.config
 
 import threading
-import threading as Thread
 import time
 
 
@@ -29,12 +28,20 @@ def direct(path_dir):
 
 def read_dir_files():
     global is_prog, path_dan, logger
+    def _test_log_file():
+        _files = glob.glob(path_dan)
+        _f = [x for x in _files if not((".log" in x.lower()) or("~" in x.lower()))]
+        _count = len(_f)
+        return (_count, _f)
+
     is_prog = False
 #    print(" --- start  -- ")
     _count_files = len(glob.glob(path_dan))
-
+    _fils_dan = _test_log_file()
+    _count_files = _fils_dan[0]
     while _count_files>0:
-         _files = glob.glob(path_dan)
+         _fils_dan = _test_log_file()
+         _files = _fils_dan[1]
          for _file in _files:
             _name_file_basa =os.path.basename(_file)
             path_dir =os.path.dirname(_file)
@@ -61,13 +68,21 @@ def read_dir_files():
             logger.info(" - перемещаем файл {}".format(__path))
             if os.path.isfile(__path):
                 os.remove(__path)
-            os.rename(_file, __path)
+            try:
+                with open(_file) as f:  # utf-8-sig   #utf-8  , encoding='utf-8-sig'
+                    pass
+                os.rename(_file, __path)
+
+            except:
+                 logger.warning(" - файл {}  занят другой программой ".format(__path))
 
             if os.path.isfile(__path):
                  logger.info(" -  файл {}  перемещен".format(__path))
             else:
                  logger.warning(" - проблема с перемещением файл {}".format(__path))
-         _count_files = len(glob.glob(path_dan))
+
+         _fils_dan = _test_log_file()
+         _count_files = _fils_dan[0]
 #    print("--- end  --  ")
     is_prog = True
 
@@ -85,7 +100,7 @@ class MyThread(threading.Thread):
         self.fun = fun
 
     def run(self):
-        while not self.stopped.wait(0.5):
+        while not self.stopped.wait(1):
             self.fun()
 
 def parse_input_arguments():
@@ -114,7 +129,6 @@ def parse_input_arguments():
 
 if __name__ == "__main__":
     print(" == START ==")
-#    path_dan ="E:\\1\\CSM UniCAN2\\UNICAN CONVERTED FILES\\*.*"
     _path_log = "C:\\CSM UniCAN2\\UNICAN CONVERTED FILES"
 
     dictLogConfig = logging_dict(_path_log)
